@@ -1,0 +1,18 @@
+{% extends "blog/base.html" %}
+{% block title %}Share Post{% endblock %}
+{% block content %}
+    {% if sent %}
+        <h1>E-mail was sent sucessfully</h1>
+        <p>
+            '{{post.title}}' was sucessfully sent to {{cd.to}}.
+        </p>
+    {% else %}
+        <h1>Share "{{post.title}}" by e-mail</h1>
+        <form action="." method="post"><!--creating the HTML form with method equals to post-->
+            {{form.as_p}} <!--Telling Djnago to render form field as a paragraph ....We can also render the for as unordered list form.as_ul or as HTML table form.as_table-->
+            {% csrf_token %}<!--The {% csrf_token %} template tag introduces a hidden field with an auto-generated token to avoid Cross-Site request forgery (CSRF) attacks.This generates the hidden field like ... <input type='hidden' name='csrfmiddlewaretoken'
+                value='26JjKo2lcEtYkGoV9z4XmJIEHLXN5LDR' /> -->  
+            <input type="submit" value="Send e-mail">
+        </form>
+    {% endif %}
+{% endblock %}

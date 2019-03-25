@@ -1,0 +1,68 @@
+{% extends "blog/base.html" %}
+{% load blog_tags %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+  {% if post.tags.count > 0%}
+    <p class="tags">
+       <b> This post is tagged with:</b>
+      {% for tag in post.tags.all %}
+        <a href="{% url 'blog:post_list_by_tag' tag.slug %}"> {{tag.name}}</a>
+        {% if not forloop.last %},{% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+  <h1>{{ post.title }}</h1>
+  <p class="date">
+    Published {{ post.publish }} by {{ post.author }}
+  </p>
+  {{ post.body|markdown }}
+  <p>
+    <a href="{% url 'blog:post_share' post.pk %}">
+      Share this Post
+    </a>
+  </p>
+  <h2>Similar posts</h2>
+  {% for post in similar_posts %}
+    <p>
+      <a href="{{post.get_absolute_url}}"> {{post.title}}</a>
+    </p>
+
+  {% empty %}
+    There are no similar posts yet
+    
+  {% endfor %}
+
+  {% with comments.count as total_comments %} <!--Note that the django template language does not use parenthesis for calling the methods .Here .count method does not used parenthesis-->
+    <h2>  <!--The {% with comments.count as total_comments %} tag allows us to assign a value to a new variable that
+      will be available to be used until the {% endwith %} tag.-->
+      {{total_comments}} comment{{total_comments|pluralize}} <!--We use the pluralize template filter to display a plural suffix for the word comment
+        depending on the total_comments value--> 
+    </h2>
+  {% endwith %}
+  {% for comment in comments %} <!--for to loop through comments-->
+    <div class="comment">
+      <p class="info">
+        Comment {{ forloop.counter }} by {{comment.name}}  <!--Here forloop.counter starts counting from one every time the loop is runned...{{ forloop.counter0 }} index start at 0.-->
+        <small>{{comment.created}}</small><!--We enumerate comments with the {{ forloop.counter }} variable,
+          which contains the loop counter in each iteration-->
+      </p>
+      {{comment.body|linebreaks}}
+    </div>
+  {% empty %}
+    <p>There are no comments yet</p>
+  {% endfor %}
+
+  <!--Now you need to render the comment form and display sucess message if sucessfully submitted-->
+  {% if new_comment %}
+    <h2>Your comment has been added</h2>
+  {% else %}
+    <h2>Add New comment</h2>
+    <form action="." method="POST">
+      {{comment_form.as_p}}
+      {% csrf_token %}
+      <p><input type="submit" value="Add a comment"></p>
+    </form>
+  {% endif %}
+{% endblock %}
